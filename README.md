@@ -143,3 +143,82 @@ onErrorCaptured((err, instance, info) => {
   return false;
 });
 ```
+
+13. Teleport
+    类似于 ReactDOM.createPortal, 用于移动组件的 DOM 位置
+
+14. Vue 状态管理
+
+- 基础： Composition API, ref, reactive, computed, watch.
+  自定义封装，对外暴露： 1. 状态；2. 改变状态的函数。（状态单独的文件，和视图分离）
+- 深层状态传递： 基于 provider/ inject
+- 集中状态管理方案： 基于 Pinia, Vuex(了解，已经过时了)
+- Vue-demiux，用在轻量化场景（UI 库和 Hooks 库）
+
+15. ref 和 reactive 的区别
+    ref
+    用于创建基本类型（如数字、字符串、布尔值）或单个对象/数组的响应式数据。
+    返回一个带有 .value 属性的对象，实际数据存储在 .value 上。
+    适合简单数据或需要响应式包装的对象。
+
+```js
+import { ref } from "vue";
+const count = ref(0);
+count.value++;
+```
+
+    reactive
+    用于创建对象或数组的深层响应式数据。
+    返回的是原始对象的代理，可以直接访问和修改属性，无需 .value。
+    适合复杂结构的数据。
+
+```js
+import { reactive } from "vue";
+const state = reactive({ count: 0 });
+state.count++; // 直接访问和修改属性
+```
+
+ref 适合基本类型和简单对象，访问时用 .value
+reactive 适合复杂对象和数组，直接访问属性
+reactive 会递归地使所有属性响应式，ref 只包装一层
+
+### 状态管理面试题目
+
+1. Vuex 和 Pinia 的区别
+   Vuex 是 Vue 2 的官方状态管理库，Pinia 是 Vue 3 推荐的状态管理库。Pinia 更加轻量化，API 更加简洁，支持 Composition API，并且更容易与 TypeScript 集成。
+
+   - 设计理念
+   - Vuex：设计来自 Flux, 包含四个核心概念： Stage，Getter，Mutation， Action
+   - Pinia: 支持模块化，每个状态模块可作为独立的 Store 存在。设计上借鉴了 Vue Composition API.
+
+   - API 和使用方式
+   - Vuex：使用 mapState、mapGetters、mapActions 等辅助函数，支持插件机制。
+     需要定义 mutation 来更新状态，必须同步执行
+
+   - Pinia: 使用 defineStore 函数定义 store，支持 Composition API，使用起来更加简洁。
+     状态，Getter，action 都在一个 store 文件中。 允许在 Action 里修改状态，无需通过 Mutation。
+
+   - Typescript 支持
+     Pinia 对 TypeScript 有更好的支持，类型推断更加完善。
+
+   - 性能
+     Vuex 性能稳定，但是 mutation 可能会有开销
+     Pinia 轻量
+
+2. 复杂状态管理
+
+- Composition API
+  reactive， ref, computed, watch 管理局部和全局状态
+  自定义 composition API，做逻辑分离和状态复用。返回：状态，和更该状态的函数
+
+- Provider/ Inject
+  用于在组件树中共享状态。
+
+- Pinia 最佳实践： composition API 风格的 store 定义
+  拆分子逻辑，在 store 里面组合
+
+- 中间件
+  pinia-plugins-persist
+
+- 外部库
+  RxJs
