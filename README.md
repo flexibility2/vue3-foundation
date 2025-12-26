@@ -222,3 +222,76 @@ reactive 会递归地使所有属性响应式，ref 只包装一层
 
 - 外部库
   RxJs
+
+### 路由相关的面试题目
+
+1. 说下 Vue-Router 的路由历史的几种模式
+
+   - Hash 模式：通过 URL 的 hash 部分来模拟不同的页面，适用于不支持 history API 的浏览器。
+   - History 模式：利用 HTML5 的 history API 实现的路由，适用于现代浏览器。
+   - Abstract 模式：用于非浏览器环境，如 Node.js 服务端渲染。
+
+2. Vue-Router 动态路由的使用和实现原理
+   动态路由允许在路由路径中使用参数，例如 /user/:id。实现原理是通过正则表达式匹配 URL，并将匹配的参数传递给组件。
+
+   - 匹配路由
+     Vue-Router 在初始化的时候会创建一颗路由树，树的每个节点对应一个路由记录。路由记录包含路径、组件、参数等信息。在匹配路由时，Vue-Router 会遍历这颗路由树，找到与当前 URL 匹配的路由记录，并将其传递给组件。
+     遇到动态路由，会将实际的 URL 片段解析并存储在 this.$store.params 中。
+
+   - 解析参数
+     当一个路径包含动态参数时，Vue-Router 会使用正则表达式来提取参数值，并将其存储在路由记录的 params 对象中。组件可以通过 this.$route.params 访问这些参数。
+
+   - 更新组件
+     当路由参数变化时，Vue-Router 会重新渲染组件。如果组件时复用的，如从/user/1 切换到 /user/2, 组件不会被销毁和重新创建，而是会调用 beforeRouteUpdate 钩子函数，触发 watch 监听 $route 的变化，以便在参数变化时更新组件数据。
+
+3. 完整的导航解析流程
+
+- 导航被触发
+- 调用失活组件的 beforeRouteLeave 守卫
+- 调用全局的 beforeEach 守卫
+- 调用重用组件的 beforeRouteUpdate 守卫
+- 调用路由独享的 beforeEnter 守卫
+- 解析异步路由组件
+- 调用被激活组件的 beforeRouteEnter 守卫
+- 调用全局的 beforeResolve 守卫
+- 导航被确认
+- 调用全局的 afterEach 钩子
+- 触发 DOM 更新
+- 调用 beforeRouteEnter 守卫传递的 next 回调函数，访问组件实例
+
+4. 异步和同步组件加载区别例子
+
+```js
+// 同步组件加载
+import MyComponent from "./MyComponent.vue";
+
+// 异步组件加载
+const AsyncComponent = defineAsyncComponent(() => import("./MyComponent.vue"));
+const AsyncComponent = () => import("./MyComponent.vue");
+```
+
+5. 路由历史记录栈
+
+createWebHistory
+路由记录依赖于浏览器原生记录
+
+- 跳转时，history.pushState() 方法会被调用
+  go, forward, back 方法会调用 history API 对应的方法
+  pushState 只会改变地址栏和历史记录，不会自动刷新页面，也不会触发 popstate 事件。
+- 浏览器的前进后退操作，会触发 popstate 事件
+  window.addEventListener('popstate', (event) => {
+  // 处理前进后退操作
+  });
+
+createMemoryHistory
+路由记录保存在内存中， 浏览器的 url 不会变。
+场景：预览的时候，无法将状态信息写入 URL。
+
+- 跳转时，history.pushState() 方法不会被调用
+- go, forward, back 方法不会调用 history 对应的方法
+
+createWebHashHistory
+路由记录依赖于 URL 的 hash 部分。
+
+- 跳转时，location.hash 会被更新
+- go, forward, back 方法会调用 history 对应的方法
